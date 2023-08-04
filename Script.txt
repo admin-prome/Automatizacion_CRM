@@ -1,0 +1,24 @@
+# Define las variables necesarias (debe configurar estas variables con los valores adecuados)
+$gdriveFolderId = "ID_DEL_DIRECTORIO_EN_GOOGLE_DRIVE"
+$recipientEmail = "correo_ejemplo@dominio.com"
+
+# Comando para listar archivos en una carpeta específica en Google Drive
+$listFilesCommand = "gdrive list -q ' '$gdriveFolderId' in parents'"
+
+# Ejecutar el comando y capturar la salida en una variable
+$listFilesResult = Invoke-Expression -Command $listFilesCommand
+
+# Verificar si la salida contiene algún archivo
+if ($listFilesResult -match "^\d+") {
+    # Si hay archivos en la carpeta, enviar una notificación por correo electrónico
+    $subject = "Nuevos archivos detectados en Google Drive"
+    $body = "Se han detectado nuevos archivos en Google Drive. Por favor, verifíquelos."
+    $smtpServer = "servidor_smtp"
+    $smtpPort = 587
+    $smtpUsername = "usuario_smtp"
+    $smtpPassword = "contraseña_smtp"
+
+    Send-MailMessage -From $smtpUsername -To $recipientEmail -Subject $subject -Body $body -SmtpServer $smtpServer -Port $smtpPort -UseSsl -Credential (Get-Credential -UserName $smtpUsername -Password (ConvertTo-SecureString $smtpPassword -AsPlainText -Force))
+} else {
+    Write-Output "No se encontraron nuevos archivos en Google Drive."
+}
